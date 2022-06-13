@@ -5,9 +5,14 @@ use App\Http\Controllers\{
     OfficeController,
     OfficeImageController,
     TagController,
+    UserController,
     UserReservationController
 };
-
+use App\Http\Controllers\Auth\{
+    LoginController,
+    LogoutController,
+    RegisterController
+};
 
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +27,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+//User
+Route::get('/user', UserController::class)->middleware(['auth:sanctum']);
 //Tags
 Route::get('/tags', TagController::class);
 
@@ -43,3 +50,9 @@ Route::delete('/reservations/{reservation}', [UserReservationController::class, 
 
 // Host Reservations
 Route::get('/host/reservations', [HostReservationController::class, 'index']);
+
+// Auth
+
+Route::post('/login', [LoginController::class]);
+Route::post('/register', [RegisterController::class]);
+Route::post('/logout', [LogoutController::class]);

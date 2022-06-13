@@ -24,7 +24,7 @@ class OfficeImageControllerTest extends TestCase
         $office = Office::factory()->for($user)->create();
         // $this->actingAs($user);
         Sanctum::actingAs($user, ['*']);
-        $response = $this->postJson("/api/offices/{$office->id}/images", [
+        $response = $this->postJson("/offices/{$office->id}/images", [
             'image' => UploadedFile::fake()->image('image.jpg')
         ]);
 
@@ -54,7 +54,7 @@ class OfficeImageControllerTest extends TestCase
         // $this->actingAs($user);
         Sanctum::actingAs($user, ['*']);
 
-        $response = $this->deleteJson("/api/offices/{$office->id}/images/{$image->id}");
+        $response = $this->deleteJson("/offices/{$office->id}/images/{$image->id}");
 
         $response->assertOk();
         $this->assertModelMissing($image);
@@ -77,7 +77,7 @@ class OfficeImageControllerTest extends TestCase
         // $this->actingAs($user);
         Sanctum::actingAs($user, ['*']);
 
-        $response = $this->deleteJson("/api/offices/{$office->id}/images/{$image->id}");
+        $response = $this->deleteJson("/offices/{$office->id}/images/{$image->id}");
 
         $response->assertUnprocessable()
             ->assertJsonValidationErrors(['image' => 'Can not delete the only image']);;
@@ -104,7 +104,7 @@ class OfficeImageControllerTest extends TestCase
         // $this->actingAs($user);
         Sanctum::actingAs($user, ['*']);
 
-        $response = $this->deleteJson("/api/offices/{$office->id}/images/{$image->id}");
+        $response = $this->deleteJson("/offices/{$office->id}/images/{$image->id}");
 
         $response->assertUnprocessable()
             ->assertJsonValidationErrors(['image' => 'Can not delete the featured image']);
@@ -129,7 +129,7 @@ class OfficeImageControllerTest extends TestCase
         // $this->actingAs($user);
         Sanctum::actingAs($user, ['*']);
 
-        $response = $this->deleteJson("/api/offices/{$office->id}/images/{$image->id}");
+        $response = $this->deleteJson("/offices/{$office->id}/images/{$image->id}");
 
         $response->assertNotFound();
     }
