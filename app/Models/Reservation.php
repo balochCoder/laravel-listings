@@ -18,6 +18,7 @@ class Reservation extends Model
         'status' => 'integer',
         'start_date' => 'immutable_date',
         'end_date' => 'immutable_date',
+        'wifi_password' => 'encrypted'
     ];
 
     // Reservation belongs to user

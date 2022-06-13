@@ -22,7 +22,15 @@ class OfficeControllerTest extends TestCase
      */
     public function itListAllOfficesInPaginatedWay()
     {
+        $user = User::factory()->create();
+        $tags = Tag::factory(2)->create();
+        $tags2 = Tag::factory(2)->create();
+        
         Office::factory(30)->create();
+
+        Office::factory()->for($user)->hasAttached($tags)->create();
+        Office::factory()->hasAttached($tags2)->create();
+
         $response = $this->getJson('/api/offices');
 
         $response->assertOk()
@@ -69,6 +77,31 @@ class OfficeControllerTest extends TestCase
 
         $response->assertOk()
             ->assertJsonCount(5, 'data');
+    }
+    /**
+     * @test
+     * 
+     */
+
+    public function itFiltersByTags()
+    {
+        $tags = Tag::factory(2)->create();
+
+        $office = Office::factory()->hasAttached($tags)->create();
+
+        Office::factory()->hasAttached($tags->first())->create();
+        Office::factory()->create();
+
+
+        $response = $this->getJson(
+            '/api/offices?' . http_build_query([
+                'tags' => $tags->pluck('id')->toArray()
+            ])
+        );
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $office->id);
     }
 
     /**
@@ -129,7 +162,7 @@ class OfficeControllerTest extends TestCase
 
 
         $response = $this->getJson('/api/offices');
-
+        // $response->dump();
         $response->assertOk()
             ->assertJsonCount(1, 'data.0.tags')
             ->assertJsonCount(1, 'data.0.images')

@@ -15,6 +15,7 @@ use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Notification;
+use Str;
 
 class UserReservationController extends Controller
 {
@@ -121,12 +122,36 @@ class UserReservationController extends Controller
                 'start_date' => $data['start_date'],
                 'end_date' => $data['end_date'],
                 'status' => Reservation::STATUS_ACTIVE,
-                'price' => $price
+                'price' => $price,
+                'wifi_password' => Str::random()
             ]);
         });
         Notification::send(auth()->user(), new NewUserReservation($reservation));
 
         Notification::send($office->user, new NewHostReservation($reservation));
+
+        return ReservationResource::make(
+            $reservation->load('office')
+        );
+    }
+
+    public function cancel(Reservation $reservation)
+    {
+        abort_unless(
+            Auth::user()->tokenCan('reservations.cancel'),
+            Response::HTTP_FORBIDDEN
+        );
+
+        throw_if(
+            $reservation->user_id != auth()->id() ||  $reservation->status == Reservation::STATUS_CANCELLED || $reservation->start_date < now()->toDateString(),
+            ValidationException::withMessages([
+                'reservation' => 'You cannot cancel this reservation'
+            ])
+        );
+
+        $reservation->update([
+            'status' => Reservation::STATUS_CANCELLED
+        ]);
 
         return ReservationResource::make(
             $reservation->load('office')

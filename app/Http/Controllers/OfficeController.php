@@ -8,6 +8,7 @@ use App\Models\Reservation;
 use App\Models\User;
 use App\Models\Validators\OfficeValidator;
 use App\Notifications\OfficePendingApproval;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
@@ -33,6 +34,15 @@ class OfficeController extends Controller
                 request('lat') && request('lng'),
                 fn ($builder) => $builder->nearestTo(request('lat'), request('lng')),
                 fn ($builder) => $builder->orderBy('id', 'ASC')
+            )
+            ->when(
+                request('tags'),
+                fn (Builder $builder) => $builder->whereHas(
+                    'tags',
+                    fn ($builder) => $builder->whereIn('id', request('tags')),
+                    '=',
+                    count(request('tags'))
+                )
             )
             ->with(['images', 'tags', 'user'])
             ->withCount(['reservations' => fn ($builder) => $builder->whereStatus(Reservation::STATUS_ACTIVE)])
@@ -131,7 +141,7 @@ class OfficeController extends Controller
             $office->reservations()->where('status', Reservation::STATUS_ACTIVE)->exists(),
             ValidationException::withMessages(['office' => 'Cannot delete this office!'])
         );
-        $office->images()->each(function($image){
+        $office->images()->each(function ($image) {
             Storage::delete($image->path);
             $image->delete();
         });
