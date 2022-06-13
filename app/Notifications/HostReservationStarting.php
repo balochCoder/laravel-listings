@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NewUserReservation extends Notification implements ShouldQueue
+class HostReservationStarting extends Notification implements ShouldQueue
 {
     use Queueable;
 
